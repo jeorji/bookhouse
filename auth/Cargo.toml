@@ -1,0 +1,12 @@
+[package]
+name = "auth"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "auth"
+path = "domain/lib.rs"
+
+[[bin]]
+name = "web_api"
+path = "web_api/main.rs"
