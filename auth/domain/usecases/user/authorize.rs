@@ -23,6 +23,8 @@ pub struct AuthDTO {
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    #[error("Permission group not found")]
+    PermissionGroupNotFound,
     #[error("User not found")]
     UserNotFound,
     #[error("Incorrect credentials")]
@@ -78,7 +80,7 @@ impl<'a> AuthUseCase<'a> {
             .permission_repository
             .find(permission_group)
             .await?
-            .ok_or(Error::UserNotFound)?;
+            .ok_or(Error::PermissionGroupNotFound)?;
 
         let authenticated_user = entities::User::new(user.email, user.password_hash, user_permission.group);
 
