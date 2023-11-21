@@ -13,6 +13,11 @@ pub struct CreateSessionDTO {
     pub refresh_token_ttl: u64,
 }
 
+pub struct CreateDTO {
+    pub entity: entities::Session,
+    pub token: String,
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Repository error [{0}]")]
@@ -30,27 +35,28 @@ impl<'a> CreateUseCase<'a> {
         }
     }
 
-    pub async fn execute(&self, dto: CreateSessionDTO) -> Result<entities::Session, Error> {
+    pub async fn execute(&self, dto: CreateSessionDTO) -> Result<CreateDTO, Error> {
         let token_data = token_service::IssueTokenDTO {
             user_id: dto.user_id,
             permission_group: dto.user_group,
         };
-        let token = self.token_service.issue(token_data)?;
+        let token_pair = self.token_service.issue(token_data)?;
         let refresh_token_exp = current_timestamp() + dto.refresh_token_ttl;
 
         let session_data = session::CreateSessionDTO {
             user_id: dto.user_id,
-            refresh_token: token.refresh_token.clone(),
+            refresh_token: token_pair.refresh_token.clone(),
             refresh_token_exp,
         };
 
         self.session_repository.create(session_data).await?;
 
-        Ok(entities::Session::new(
-            dto.user_id,
-            token.refresh_token,
-            refresh_token_exp,
-        ))
+        let session = entities::Session::new(dto.user_id, token_pair.refresh_token, refresh_token_exp);
+
+        Ok(CreateDTO {
+            entity: session,
+            token: token_pair.token,
+        })
     }
 }
 

@@ -16,6 +16,11 @@ pub struct AuthUserDTO {
     pub password: String,
 }
 
+pub struct AuthDTO {
+    pub entity: entities::User,
+    pub user_id: uuid::Uuid,
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("User not found")]
@@ -43,7 +48,7 @@ impl<'a> AuthUseCase<'a> {
         }
     }
 
-    pub async fn execute(&self, dto: AuthUserDTO) -> Result<entities::User, Error> {
+    pub async fn execute(&self, dto: AuthUserDTO) -> Result<AuthDTO, Error> {
         if dto.password.is_empty() {
             return Err(Error::EmptyPassword);
         }
@@ -55,9 +60,8 @@ impl<'a> AuthUseCase<'a> {
         let user = self
             .user_repository
             .find(find_dto)
-            .await?;
-
-        let user = user.ok_or(Error::UserNotFound)?;
+            .await?
+            .ok_or(Error::UserNotFound)?;
 
         let data = hashing_service::VerifyPasswordDTO {
             plain_password: dto.password,
@@ -73,12 +77,14 @@ impl<'a> AuthUseCase<'a> {
         let user_permission = self
             .permission_repository
             .find(permission_group)
-            .await?;
+            .await?
+            .ok_or(Error::UserNotFound)?;
 
-        Ok(entities::User::new(
-            user.email,
-            user.password_hash,
-            user_permission.group,
-        ))
+        let authenticated_user = entities::User::new(user.email, user.password_hash, user_permission.group);
+
+        Ok(AuthDTO {
+            entity: authenticated_user,
+            user_id: user.id,
+        })
     }
 }
