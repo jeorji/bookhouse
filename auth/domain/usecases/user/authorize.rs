@@ -5,10 +5,10 @@ use crate::ports::{
 
 use crate::entities;
 
-pub struct AuthUseCase {
-    user_repository: user::BxUserRepository,
-    permission_repository: permission::BxPermissionRepository,
-    hashing_service: hashing_service::BxHashingService,
+pub struct AuthUseCase<'a> {
+    user_repository: &'a dyn user::UserRepository,
+    permission_repository: &'a dyn permission::PermissionRepository,
+    hashing_service: &'a dyn hashing_service::HashingService,
 }
 
 pub struct AuthUserDTO {
@@ -30,11 +30,11 @@ pub enum Error {
     RepositoryError(#[from] crate::ports::Error),
 }
 
-impl AuthUseCase {
+impl<'a> AuthUseCase<'a> {
     pub fn new(
-        ur: user::BxUserRepository,
-        pr: permission::BxPermissionRepository,
-        hs: hashing_service::BxHashingService,
+        ur: &'a dyn user::UserRepository,
+        pr: &'a dyn permission::PermissionRepository,
+        hs: &'a dyn hashing_service::HashingService,
     ) -> Self {
         Self {
             user_repository: ur,
