@@ -7,6 +7,7 @@ edition = "2021"
 actix-web = "4.4.0"
 async-trait = "0.1.73"
 dotenvy = "0.15.7"
+jsonwebtoken = { version = "9.1.0", features = ["use_pem"] }
 rand = "0.8.5"
 serde = { version = "1.0.188", features = ["derive"] }
 sha2 = "0.10.8"
