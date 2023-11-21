@@ -5,7 +5,6 @@ pub trait TokenService {
     fn verify(&self, dto: VerifyTokenDTO) -> Result<bool, Error>;
     fn renew(&self, dto: RenewTokenDTO) -> Result<TokenPairDTO, Error>;
 }
-pub type BxTokenService = Box<dyn TokenService>;
 
 pub struct IssueTokenDTO {
     pub user_id: uuid::Uuid,

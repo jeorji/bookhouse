@@ -4,7 +4,6 @@ use crate::ports::Error;
 pub trait SessionRepository {
     async fn create(&self, dto: CreateSessionDTO) -> Result<SessionDTO, Error>;
 }
-pub type BxSessionRepository = Box<dyn SessionRepository>;
 
 pub struct CreateSessionDTO {
     pub user_id: uuid::Uuid,

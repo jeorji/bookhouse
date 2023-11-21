@@ -1,9 +1,9 @@
 use crate::entities;
 use crate::ports::{repositories::session, services::token_service};
 
-pub struct CreateUseCase {
-    session_repository: session::BxSessionRepository,
-    token_service: token_service::BxTokenService,
+pub struct CreateUseCase<'a> {
+    session_repository: &'a dyn session::SessionRepository,
+    token_service: &'a dyn token_service::TokenService,
 }
 
 pub struct CreateSessionDTO {
@@ -19,8 +19,11 @@ pub enum Error {
     RepositoryError(#[from] crate::ports::Error),
 }
 
-impl CreateUseCase {
-    pub fn new(sr: session::BxSessionRepository, ts: token_service::BxTokenService) -> Self {
+impl<'a> CreateUseCase<'a> {
+    pub fn new(
+        sr: &'a dyn session::SessionRepository,
+        ts: &'a dyn token_service::TokenService,
+    ) -> Self {
         Self {
             session_repository: sr,
             token_service: ts,
