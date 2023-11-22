@@ -73,7 +73,7 @@ async fn register(form: web::Form<UserCredentials>, state: web::Data<AppState>) 
     };
     let hasher = Sha256Hasher {};
 
-    let register = RegisterUseCase::new(Box::new(repository), Box::new(hasher));
+    let register = RegisterUseCase::new(&repository, &hasher);
     let new_user = RegisterUserDTO {
         email: form.login.clone(),
         password: form.password.clone(),

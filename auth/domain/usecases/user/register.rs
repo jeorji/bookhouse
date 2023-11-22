@@ -1,8 +1,8 @@
 use crate::ports::{repositories::user, services::hashing_service};
 
-pub struct RegisterUseCase {
-    user_repository: user::BxUserRepository,
-    hashing_service: hashing_service::BxHashingService,
+pub struct RegisterUseCase<'a> {
+    user_repository: &'a dyn user::UserRepository,
+    hashing_service: &'a dyn hashing_service::HashingService,
 }
 
 pub struct RegisterUserDTO {
@@ -22,8 +22,11 @@ pub enum Error {
     RepositoryError(crate::ports::Error),
 }
 
-impl RegisterUseCase {
-    pub fn new(ur: user::BxUserRepository, hs: hashing_service::BxHashingService) -> Self {
+impl<'a> RegisterUseCase<'a> {
+    pub fn new(
+        ur: &'a dyn user::UserRepository,
+        hs: &'a dyn hashing_service::HashingService,
+    ) -> Self {
         Self {
             user_repository: ur,
             hashing_service: hs,
