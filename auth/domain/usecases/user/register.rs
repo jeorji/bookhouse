@@ -24,7 +24,7 @@ pub enum Error {
     #[error("User already exists")]
     UserAlreadyExist,
     #[error("Repository error [{0}]")]
-    RepositoryError(crate::ports::Error),
+    RepositoryError(#[from] crate::ports::Error),
 }
 
 impl<'a> RegisterUseCase<'a> {
@@ -61,20 +61,13 @@ impl<'a> RegisterUseCase<'a> {
             password_hash,
             salt,
         };
-        let user = self
-            .user_repository
-            .create(new_user)
-            .await
-            .map_err(Error::RepositoryError)?;
+        let user = self.user_repository.create(new_user).await?;
 
         let user_permission = permission::CreatePermissionDTO {
             user_id: user.id,
             group: dto.permission_group,
         };
-        self.permission_repository
-            .create(user_permission)
-            .await
-            .map_err(Error::RepositoryError)?;
+        self.permission_repository.create(user_permission).await?;
 
         Ok(())
     }
@@ -84,9 +77,6 @@ impl<'a> RegisterUseCase<'a> {
             email: dto.email.clone(),
         };
 
-        match self.user_repository.find(find_user_dto).await {
-            Ok(user) => Ok(user.is_some()),
-            Err(err) => Err(Error::RepositoryError(err)),
-        }
+        Ok(self.user_repository.find(find_user_dto).await?.is_some())
     }
 }

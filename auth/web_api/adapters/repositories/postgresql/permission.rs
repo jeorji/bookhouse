@@ -1,15 +1,9 @@
 use auth::ports::{
     repositories::permission::PermissionRepository,
     repositories::permission::{CreatePermissionDTO, FindPermissionDTO, PermissionDTO},
-    Error,
 };
+use super::{SQLXError, Error};
 
-pub struct SQLXError(sqlx::Error);
-impl From<SQLXError> for Error {
-    fn from(err: SQLXError) -> Self {
-        Error::InfrastructureError(Box::new(err.0))
-    }
-}
 pub struct PostgresPermissonRepository {
     pub conncection_pool: sqlx::PgPool,
 }

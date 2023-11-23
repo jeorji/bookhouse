@@ -1,15 +1,9 @@
 use auth::ports::{
     repositories::user::UserRepository,
     repositories::user::{CreateUserDTO, FindUserDTO, UserDTO},
-    Error,
 };
+use super::{SQLXError, Error};
 
-pub struct SQLXError(sqlx::Error);
-impl From<SQLXError> for Error {
-    fn from(err: SQLXError) -> Self {
-        Error::InfrastructureError(Box::new(err.0))
-    }
-}
 pub struct PostgresUserRepository {
     pub conncection_pool: sqlx::PgPool,
 }
