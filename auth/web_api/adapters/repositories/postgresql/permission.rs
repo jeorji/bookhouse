@@ -1,6 +1,6 @@
 use auth::ports::{
     repositories::permission::PermissionRepository,
-    repositories::permission::{FindPermissionDTO, PermissionDTO},
+    repositories::permission::{CreatePermissionDTO, FindPermissionDTO, PermissionDTO},
     Error,
 };
 
@@ -29,5 +29,22 @@ impl PermissionRepository for PostgresPermissonRepository {
             user_id: dto.user_id,
             group: record.group,
         }))
+    }
+
+    async fn create(&self, dto: CreatePermissionDTO) -> Result<PermissionDTO, Error> {
+        let query_result = sqlx::query!(
+            r#"INSERT INTO "permission" VALUES ($1, $2) RETURNING *"#,
+            dto.user_id,
+            dto.group,
+        )
+        .fetch_one(&self.conncection_pool)
+        .await
+        .map_err(SQLXError)?;
+
+        Ok(PermissionDTO {
+            // add custom Error and remove unwrap
+            user_id: query_result.user_id.unwrap(),
+            group: query_result.group,
+        })
     }
 }

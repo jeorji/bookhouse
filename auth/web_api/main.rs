@@ -25,13 +25,16 @@ struct AppState {
 }
 
 #[derive(serde::Deserialize)]
-struct UserCredentials {
+struct UserAuthorizationCredentials {
     login: String,
     password: String,
 }
 
 #[post("/authorize")]
-async fn authorize(form: web::Form<UserCredentials>, state: web::Data<AppState>) -> impl Responder {
+async fn authorize(
+    form: web::Form<UserAuthorizationCredentials>,
+    state: web::Data<AppState>,
+) -> impl Responder {
     let user_repository = PostgresUserRepository {
         conncection_pool: state.db.clone(),
     };
@@ -66,17 +69,31 @@ async fn authorize(form: web::Form<UserCredentials>, state: web::Data<AppState>)
     actix_web::HttpResponse::Ok().finish()
 }
 
+#[derive(serde::Deserialize)]
+struct UserRegistrationCredentials {
+    login: String,
+    password: String,
+    group_id: i32,
+}
 #[post("/register")]
-async fn register(form: web::Form<UserCredentials>, state: web::Data<AppState>) -> impl Responder {
-    let repository = PostgresUserRepository {
+async fn register(
+    form: web::Form<UserRegistrationCredentials>,
+    state: web::Data<AppState>,
+) -> impl Responder {
+    let user_repository = PostgresUserRepository {
         conncection_pool: state.db.clone(),
     };
+    let permission_repository = PostgresPermissonRepository {
+        conncection_pool: state.db.clone(),
+    };
+
     let hasher = Sha256Hasher {};
 
-    let register = RegisterUseCase::new(Box::new(repository), Box::new(hasher));
+    let register = RegisterUseCase::new(&user_repository, &permission_repository, &hasher);
     let new_user = RegisterUserDTO {
         email: form.login.clone(),
         password: form.password.clone(),
+        permission_group: form.group_id,
     };
 
     register.execute(new_user).await.unwrap();

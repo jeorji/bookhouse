@@ -1,13 +1,18 @@
-use crate::ports::{repositories::user, services::hashing_service};
+use crate::ports::{
+    repositories::{permission, user},
+    services::hashing_service,
+};
 
-pub struct RegisterUseCase {
-    user_repository: user::BxUserRepository,
-    hashing_service: hashing_service::BxHashingService,
+pub struct RegisterUseCase<'a> {
+    user_repository: &'a dyn user::UserRepository,
+    permission_repository: &'a dyn permission::PermissionRepository,
+    hashing_service: &'a dyn hashing_service::HashingService,
 }
 
 pub struct RegisterUserDTO {
     pub email: String,
     pub password: String,
+    pub permission_group: i32,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -22,10 +27,15 @@ pub enum Error {
     RepositoryError(crate::ports::Error),
 }
 
-impl RegisterUseCase {
-    pub fn new(ur: user::BxUserRepository, hs: hashing_service::BxHashingService) -> Self {
+impl<'a> RegisterUseCase<'a> {
+    pub fn new(
+        ur: &'a dyn user::UserRepository,
+        pr: &'a dyn permission::PermissionRepository,
+        hs: &'a dyn hashing_service::HashingService,
+    ) -> Self {
         Self {
             user_repository: ur,
+            permission_repository: pr,
             hashing_service: hs,
         }
     }
@@ -51,9 +61,18 @@ impl RegisterUseCase {
             password_hash,
             salt,
         };
-
-        self.user_repository
+        let user = self
+            .user_repository
             .create(new_user)
+            .await
+            .map_err(Error::RepositoryError)?;
+
+        let user_permission = permission::CreatePermissionDTO {
+            user_id: user.id,
+            group: dto.permission_group,
+        };
+        self.permission_repository
+            .create(user_permission)
             .await
             .map_err(Error::RepositoryError)?;
 
