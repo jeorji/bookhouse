@@ -10,6 +10,7 @@ use adapters::user::PostgresUserRepository;
 
 use auth::usecases::session;
 use auth::usecases::session::create::CreateSessionDTO;
+use auth::usecases::session::refresh::RefreshSessionDTO;
 use auth::usecases::user;
 use auth::usecases::user::authorize::AuthUserDTO;
 use auth::usecases::user::register::{RegisterUseCase, RegisterUserDTO};
@@ -28,6 +29,34 @@ struct AppState {
 struct UserAuthorizationCredentials {
     login: String,
     password: String,
+}
+
+#[derive(serde::Deserialize)]
+struct TokenCredentials {
+    token: String,
+    refresh_token: String,
+}
+
+#[post("/refresh")]
+async fn refresh(form: web::Form<TokenCredentials>, state: web::Data<AppState>) -> impl Responder {
+    let session_repository = PostgresSessionRepository {
+        conncection_pool: state.db.clone(),
+    };
+
+    let session_updater = session::RefreshUseCase::new(&session_repository, &state.token_service);
+
+    let data = RefreshSessionDTO {
+        token: form.token.clone(),
+        refresh_token: form.refresh_token.clone(),
+        refresh_token_ttl: state.config.rt_ttl,
+    };
+    let updated_session = session_updater.execute(data).await.unwrap();
+
+    dbg! { updated_session.entity.refresh_token };
+    dbg! { updated_session.entity.refresh_token_exp };
+    dbg! { updated_session.token };
+
+    actix_web::HttpResponse::Ok().finish()
 }
 
 #[post("/authorize")]
@@ -134,6 +163,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(app_data.clone())
             .service(register)
             .service(authorize)
+            .service(refresh)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
