@@ -1,4 +1,5 @@
 use actix_web::{post, web, App, HttpServer, Responder};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 
 mod adapters;
@@ -34,11 +35,14 @@ struct UserAuthorizationCredentials {
 #[derive(serde::Deserialize)]
 struct TokenCredentials {
     token: String,
-    refresh_token: String,
 }
 
 #[post("/refresh")]
-async fn refresh(form: web::Form<TokenCredentials>, state: web::Data<AppState>) -> impl Responder {
+async fn refresh(
+    auth: BearerAuth,
+    form: web::Form<TokenCredentials>,
+    state: web::Data<AppState>,
+) -> impl Responder {
     let session_repository = PostgresSessionRepository {
         conncection_pool: state.db.clone(),
     };
@@ -47,7 +51,7 @@ async fn refresh(form: web::Form<TokenCredentials>, state: web::Data<AppState>) 
 
     let data = RefreshSessionDTO {
         token: form.token.clone(),
-        refresh_token: form.refresh_token.clone(),
+        refresh_token: auth.token().to_string(),
         refresh_token_ttl: state.config.rt_ttl,
     };
     let updated_session = session_updater.execute(data).await.unwrap();
