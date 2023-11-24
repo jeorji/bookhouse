@@ -139,7 +139,8 @@ async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().unwrap();
 
     let db_url = dotenvy::var("DATABASE_URL").unwrap();
-    let jwt_pem_path = dotenvy::var("JWT_PEM_PATH").unwrap();
+    let jwt_private_pem_path = dotenvy::var("JWT_PRIVATE_PEM_PATH").unwrap();
+    let jwt_public_pem_path = dotenvy::var("JWT_PUBLIC_PEM_PATH").unwrap();
     let jwt_ttl: usize = dotenvy::var("JWT_TTL").unwrap().parse().unwrap();
     let rt_ttl: u64 = dotenvy::var("RT_TTL").unwrap().parse().unwrap();
 
@@ -149,8 +150,10 @@ async fn main() -> std::io::Result<()> {
         .await
         .unwrap();
 
-    let jwt_pem = std::fs::read(jwt_pem_path).unwrap();
-    let jwt_token_service = JWTService::es256_from_pem_with_ttl(&jwt_pem, jwt_ttl).unwrap();
+    let jwt_private_pem = std::fs::read(jwt_private_pem_path).unwrap();
+    let jwt_public_pem = std::fs::read(jwt_public_pem_path).unwrap();
+    let jwt_token_service =
+        JWTService::es256_from_pem_with_ttl(&jwt_public_pem, &jwt_private_pem, jwt_ttl).unwrap();
 
     let app_conf = AppConfig { rt_ttl };
 

@@ -31,13 +31,14 @@ impl From<JWTError> for ports::Error {
 
 impl JWTService {
     pub fn es256_from_pem_with_ttl(
-        pem: &[u8],
+        public_pem: &[u8],
+        private_pem: &[u8],
         jwt_ttl: usize,
     ) -> Result<Self, jsonwebtoken::errors::Error> {
         Ok(JWTService {
             jwt_ttl,
-            public_key: jsonwebtoken::DecodingKey::from_secret(pem),
-            private_key: jsonwebtoken::EncodingKey::from_ec_pem(pem)?,
+            public_key: jsonwebtoken::DecodingKey::from_ec_pem(public_pem)?,
+            private_key: jsonwebtoken::EncodingKey::from_ec_pem(private_pem)?,
             header: jsonwebtoken::Header::new(jsonwebtoken::Algorithm::ES256),
         })
     }
@@ -61,12 +62,14 @@ impl TokenService for JWTService {
     }
 
     fn renew(&self, dto: RenewTokenDTO) -> Result<TokenPairDTO, ports::Error> {
-        let validation = jsonwebtoken::Validation::new(self.header.alg);
+        let mut validation = jsonwebtoken::Validation::new(self.header.alg);
+        validation.validate_exp = false;
         let mut old_token =
             jsonwebtoken::decode::<Claims>(&dto.token, &self.public_key, &validation)
                 .map_err(JWTError)?;
 
-        old_token.claims.exp += self.jwt_ttl;
+        let now = jsonwebtoken::get_current_timestamp() as usize;
+        old_token.claims.exp = now + self.jwt_ttl;
 
         let new_token =
             jsonwebtoken::encode::<Claims>(&self.header, &old_token.claims, &self.private_key)

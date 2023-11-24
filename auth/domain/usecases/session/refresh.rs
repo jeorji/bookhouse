@@ -43,7 +43,7 @@ impl<'a> RefreshUseCase<'a> {
         if !self.session_exist(dto.refresh_token.clone()).await? {
             return Err(Error::SessionNotFound);
         }
-        if !self.session_expire(dto.refresh_token.clone()).await? {
+        if self.session_expire(dto.refresh_token.clone()).await? {
             return Err(Error::SessionExpired);
         }
 
