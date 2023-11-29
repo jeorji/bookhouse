@@ -4,8 +4,8 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 mod adapters;
 use adapters::jwt::JWTService;
 
-mod response;
 mod handlers;
+mod response;
 
 struct AppConfig {
     rt_ttl: u64,
@@ -51,9 +51,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
-            .route("/register", web::post().to(handlers::register::register))
-            .route("/authorize", web::post().to(handlers::authorize::authorize))
-            .route("/refresh", web::post().to(handlers::refresh::refresh))
+            .route("/register", web::post().to(handlers::register))
+            .route("/authorize", web::post().to(handlers::authorize))
+            .route("/refresh", web::post().to(handlers::refresh))
     })
     .bind(("127.0.0.1", 8080))?
     .run()
