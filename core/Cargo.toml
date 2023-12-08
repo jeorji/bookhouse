@@ -2,3 +2,14 @@
 name = "core"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+actix-web = "4.4.0"
+
+[lib]
+name = "core"
+path = "domain/lib.rs"
+
+[[bin]]
+name = "web_api"
+path = "web_api/main.rs"
