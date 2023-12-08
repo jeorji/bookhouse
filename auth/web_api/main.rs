@@ -33,6 +33,10 @@ async fn main() -> std::io::Result<()> {
         .await
         .unwrap();
 
+    sqlx::migrate!("web_api/adapters/repositories/postgresql/migrations")
+        .run(&pool)
+        .await.unwrap();
+
     let jwt_private_pem = std::fs::read(jwt_private_pem_path).unwrap();
     let jwt_public_pem = std::fs::read(jwt_public_pem_path).unwrap();
     let jwt_token_service =
@@ -55,7 +59,7 @@ async fn main() -> std::io::Result<()> {
             .route("/authorize", web::post().to(handlers::authorize))
             .route("/refresh", web::post().to(handlers::refresh))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
