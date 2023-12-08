@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,\n                   user_id,\n                   refresh_token,\n                   EXTRACT(EPOCH\n                           FROM refresh_token_exp)::BIGINT AS refresh_token_exp\n            FROM \"session\"\n            WHERE refresh_token = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "refresh_token",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "refresh_token_exp",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "1ae416b1252ecf37e74aefcba8a8c8ced2d3fe624656db9f02a04f037785972c"
+}

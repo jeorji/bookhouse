@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE \"session\"\n            SET refresh_token = $1,\n                refresh_token_exp = to_timestamp($2)\n            WHERE refresh_token = $3 RETURNING id, user_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Float8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "3161ba938d86c8189ee38be5eaca4c73224e7dde9ca042a870eb090478d4dcc7"
+}
