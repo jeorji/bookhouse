@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.0"
+uuid = { version = "1.6.1", features = ["serde", "v4"] }
+async-trait = "0.1.73"
+thiserror = "1.0.50"
 
 [lib]
 name = "core"
