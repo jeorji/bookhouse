@@ -3,13 +3,13 @@ use super::FindRepo;
 
 #[async_trait::async_trait]
 pub trait InventoryRepository:
-    FindRepo<FindByBookIdDTO, InventoryDTO>
+    FindRepo<FindByBookEditionIdDTO, InventoryDTO>
     + FindRepo<FindByWarehouseIdDTO, InventoryDTO>
     + CreateRepo<CreateInventoryDTO, InventoryDTO>
 {
 }
 
-pub struct FindByBookIdDTO {
+pub struct FindByBookEditionIdDTO {
     pub book_edition_id: uuid::Uuid,
 }
 

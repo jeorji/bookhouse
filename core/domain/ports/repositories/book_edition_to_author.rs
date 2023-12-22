@@ -3,13 +3,18 @@ use super::FindRepo;
 
 #[async_trait::async_trait]
 pub trait BookEditionToAuthorRepository:
-    FindRepo<FindBookEditionIdDTO, BookEditionToAuthorDTO>
+    FindRepo<FindByBookEditionIdDTO, BookEditionToAuthorDTO>
+    + FindRepo<FindByAuthorIdDTO, BookEditionToAuthorDTO>
     + CreateRepo<CreateBookEditionToAuthorDTO, BookEditionToAuthorDTO>
 {
 }
 
-pub struct FindBookEditionIdDTO {
+pub struct FindByBookEditionIdDTO {
     pub book_edition_id: uuid::Uuid,
+}
+
+pub struct FindByAuthorIdDTO {
+    pub author_id: uuid::Uuid,
 }
 
 pub struct CreateBookEditionToAuthorDTO {

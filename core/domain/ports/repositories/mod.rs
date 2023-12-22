@@ -8,13 +8,13 @@ pub mod supply;
 pub mod warehouse;
 
 #[async_trait::async_trait]
-pub trait FindRepo<T, R> {
-    async fn find(&self, dto: T) -> Result<Option<R>, super::Error>;
+pub trait CreateRepo<T, R> {
+    async fn create(&self, dto: T) -> Result<R, super::Error>;
 }
 
 #[async_trait::async_trait]
-pub trait CreateRepo<T, R> {
-    async fn create(&self, dto: T) -> Result<R, super::Error>;
+pub trait FindRepo<T, R> {
+    async fn find(&self, dto: T) -> Result<Option<R>, super::Error>;
 }
 
 #[async_trait::async_trait]
