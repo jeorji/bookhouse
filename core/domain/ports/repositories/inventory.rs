@@ -3,8 +3,8 @@ use super::FindRepo;
 
 #[async_trait::async_trait]
 pub trait InventoryRepository:
-    FindRepo<FindByBookEditionIdDTO, InventoryDTO>
-    + FindRepo<FindByWarehouseIdDTO, InventoryDTO>
+    FindRepo<FindByBookEditionIdDTO, Vec<InventoryDTO>>
+    + FindRepo<FindByWarehouseIdDTO, Vec<InventoryDTO>>
     + CreateRepo<CreateInventoryDTO, InventoryDTO>
 {
 }

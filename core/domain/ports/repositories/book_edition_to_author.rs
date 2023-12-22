@@ -3,8 +3,8 @@ use super::FindRepo;
 
 #[async_trait::async_trait]
 pub trait BookEditionToAuthorRepository:
-    FindRepo<FindByBookEditionIdDTO, BookEditionToAuthorDTO>
-    + FindRepo<FindByAuthorIdDTO, BookEditionToAuthorDTO>
+    FindRepo<FindByBookEditionIdDTO, Vec<BookEditionToAuthorDTO>>
+    + FindRepo<FindByAuthorIdDTO, Vec<BookEditionToAuthorDTO>>
     + CreateRepo<CreateBookEditionToAuthorDTO, BookEditionToAuthorDTO>
 {
 }

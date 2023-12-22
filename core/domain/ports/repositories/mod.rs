@@ -6,6 +6,7 @@ pub mod inventory;
 pub mod supplier;
 pub mod supply;
 pub mod warehouse;
+pub mod supply_content;
 
 #[async_trait::async_trait]
 pub trait CreateRepo<T, R> {
